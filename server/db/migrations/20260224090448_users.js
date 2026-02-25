@@ -8,6 +8,7 @@ export function up(knex) {
     table.string('first_name')
     table.string('last_name')
     table.boolean('profile_complete').defaultTo(false)
+    table.timestamps(true, true)
   })
 }
 
