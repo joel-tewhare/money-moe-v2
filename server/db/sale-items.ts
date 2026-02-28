@@ -8,11 +8,10 @@ export async function createSaleItem(
   retailCents: number,
   costCents: number,
   lineTotalCents: number,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ) {
-  const conn = trx ?? db
-  const now = new Date().toISOString()
-  const [row] = await conn('sale_items')
+  const connection = trx ?? db
+  const [row] = await connection('sale_items')
     .insert({
       sale_id: saleId,
       product_id: productId,
@@ -35,10 +34,19 @@ export async function createSaleItem(
   return row
 }
 
-export async function getSaleItemsForTotals(saleIds: number[], trx?: Knex.Transaction) {
-  const conn = trx ?? db
-  const rows = await conn('sale_items')
+export async function getSaleItemsForTotals(
+  saleIds: number[],
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const rows = await connection('sale_items')
     .whereIn('sale_id', saleIds)
-    .select('sale_id as saleId', 'quantity', 'retail_cents as retailCents', 'cost_cents as costCents', 'line_total_cents as lineTotalCents')
+    .select(
+      'sale_id as saleId',
+      'quantity',
+      'retail_cents as retailCents',
+      'cost_cents as costCents',
+      'line_total_cents as lineTotalCents',
+    )
   return rows
 }

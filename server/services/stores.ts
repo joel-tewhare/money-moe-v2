@@ -4,7 +4,10 @@ import * as dbSales from '../db/sales.js'
 import * as dbSaleItems from '../db/sale-items.js'
 import db from '../db/connection.js'
 
-export async function createStoreWithStock(categoryId: number, participantId: number) {
+export async function createStoreWithStock(
+  categoryId: number,
+  participantId: number,
+) {
   return db.transaction(async (trx) => {
     const store = await dbStores.createStore(categoryId, participantId, trx)
     await dbStoreStock.seedStoreStock(store.id, categoryId, trx)
@@ -22,7 +25,7 @@ export async function endStore(storeId: number) {
       throw new Error('Store already ended')
     }
     const sales = await dbSales.getSalesByStoreId(storeId, trx)
-    const saleIds = sales.map((s: { id: number }) => s.id)
+    const saleIds = sales.map((saleItem: { id: number }) => saleItem.id)
     let totalRevenueCents = 0
     let totalCostCents = 0
     if (saleIds.length > 0) {
@@ -38,7 +41,7 @@ export async function endStore(storeId: number) {
       storeId,
       { totalRevenueCents, totalCostCents, profitCents },
       endedAt,
-      trx
+      trx,
     )
     return dbStores.getStoreById(storeId, trx)
   })
@@ -51,7 +54,7 @@ export async function getStoreSummary(storeId: number) {
   }
   const stock = await dbStoreStock.getStoreStockByStoreId(storeId)
   const sales = await dbSales.getSalesByStoreId(storeId)
-  const saleIds = sales.map((s: { id: number }) => s.id)
+  const saleIds = sales.map((saleItem: { id: number }) => saleItem.id)
   let totalRevenueCents = 0
   let totalCostCents = 0
   if (saleIds.length > 0) {

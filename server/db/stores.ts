@@ -4,11 +4,11 @@ import db from './connection.js'
 export async function createStore(
   categoryId: number,
   participantId: number,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ) {
-  const conn = trx ?? db
+  const connection = trx ?? db
   const now = new Date().toISOString()
-  const [row] = await conn('stores')
+  const [row] = await connection('stores')
     .insert({
       category_id: categoryId,
       participant_id: participantId,
@@ -33,8 +33,8 @@ export async function createStore(
 }
 
 export async function getStoreById(id: number, trx?: Knex.Transaction) {
-  const conn = trx ?? db
-  const row = await conn('stores')
+  const connection = trx ?? db
+  const row = await connection('stores')
     .where('id', id)
     .select(
       'id',
@@ -46,7 +46,7 @@ export async function getStoreById(id: number, trx?: Knex.Transaction) {
       'total_cost_cents as totalCostCents',
       'profit_cents as profitCents',
       'created_at as createdAt',
-      'updated_at as updatedAt'
+      'updated_at as updatedAt',
     )
     .first()
   return row
@@ -54,12 +54,16 @@ export async function getStoreById(id: number, trx?: Knex.Transaction) {
 
 export async function updateStoreTotals(
   id: number,
-  totals: { totalRevenueCents: number; totalCostCents: number; profitCents: number },
+  totals: {
+    totalRevenueCents: number
+    totalCostCents: number
+    profitCents: number
+  },
   endedAt: string,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ) {
-  const conn = trx ?? db
-  await conn('stores').where('id', id).update({
+  const connection = trx ?? db
+  await connection('stores').where('id', id).update({
     total_revenue_cents: totals.totalRevenueCents,
     total_cost_cents: totals.totalCostCents,
     profit_cents: totals.profitCents,
