@@ -1,11 +1,12 @@
-function App() {
+import { Outlet } from 'react-router-dom'
+
+export default function App() {
   return (
     <>
-      <div className="app">
-        <h1 className="text-3xl font-bold underline">Money Moe</h1>
-      </div>
+      <main>
+        <Outlet />
+      </main>
+      <footer></footer>
     </>
   )
 }
-
-export default App
