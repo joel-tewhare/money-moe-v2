@@ -61,3 +61,11 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+.text-outline {
+  text-shadow:
+    -1px -1px 0 #f7fff7,
+    1px -1px 0 #f7fff7,
+    -1px 1px 0 #f7fff7,
+    1px 1px 0 #f7fff7;
+}
