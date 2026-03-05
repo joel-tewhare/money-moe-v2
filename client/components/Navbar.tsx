@@ -11,21 +11,19 @@ export default function Navbar() {
         MONEY MOE
       </Link>
       <div className="flex items-center gap-2 p-10">
-        <Button variant="ghost" asChild>
-          <Link
-            to="/placeholder1"
-            className="text-moe-cream hover:text-moe-mint-light text-2xl font-black transition-colors"
-          >
-            How It Works
-          </Link>
+        <Button
+          variant="ghost"
+          asChild
+          className="text-moe-cream hover:text-moe-mint-light text-2xl font-black transition-colors"
+        >
+          <Link to="/placeholder1">How It Works</Link>
         </Button>
-        <Button variant="ghost" asChild>
-          <Link
-            to="/placeholder2"
-            className="text-moe-cream hover:text-moe-mint-light text-2xl font-black transition-colors"
-          >
-            Sign In
-          </Link>
+        <Button
+          variant="ghost"
+          asChild
+          className="text-moe-cream hover:text-moe-mint-light text-2xl font-black transition-colors"
+        >
+          <Link to="/placeholder2">Sign In</Link>
         </Button>
       </div>
     </nav>
