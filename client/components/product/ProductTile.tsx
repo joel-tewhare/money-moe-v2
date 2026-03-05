@@ -7,7 +7,7 @@ type Props = {
 
 export function ProductTile({ children, className }: Props) {
   return (
-    <div className={cn('bg-moe-mint-light rounded-2xl shadow-md', className)}>
+    <div className={cn('bg-moe-cream rounded-2xl shadow-md', className)}>
       {children}
     </div>
   )
