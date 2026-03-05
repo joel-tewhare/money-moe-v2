@@ -57,6 +57,9 @@ export default {
           green: '#38a169',
           slate: '#2d3748',
         },
+        fontFamily: {
+          poppins: ['Poppins', 'sans-serif'],
+        },
       },
     },
   },
