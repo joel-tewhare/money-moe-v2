@@ -1,11 +1,14 @@
-function App() {
+import { Outlet } from 'react-router-dom'
+import Navbar from './Navbar'
+
+export default function App() {
   return (
     <>
-      <div className="app">
-        <h1 className="text-3xl font-bold underline">Money Moe</h1>
-      </div>
+      <Navbar />
+      <main>
+        <Outlet />
+      </main>
+      <footer></footer>
     </>
   )
 }
-
-export default App
