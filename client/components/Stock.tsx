@@ -33,11 +33,16 @@ export default function Stock() {
   return (
     <div className="mt-8 flex flex-col gap-8">
       <div className="mb-14 flex flex-row items-stretch justify-center gap-14">
-        <MoePanel className="max-h-[28rem] max-w-[28rem] p-6 text-moe-cream">
+        <MoePanel className="flex max-h-[28rem] max-w-[28rem] flex-col justify-between p-6 text-moe-cream">
           <p className="text-sm">
             Instructions and educational information goes here in the voice of
             MOE. Arrows slide to more information.
           </p>
+          <img
+            src="/assets/moe/moe-2.png"
+            alt="Moe"
+            className="mt-4 h-64 w-2/3 object-contain"
+          />
         </MoePanel>
         <div className="flex flex-col justify-center gap-8">
           <div className="flex flex-col gap-4">
