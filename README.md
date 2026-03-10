@@ -1,34 +1,37 @@
-# Boilerplate: Fullstack with Sass
+# Money Moe
+An educational app for kids to learn about buying and selling. Guided by Moe, users set up their own store to sell goods while learning important financial and business concepts along the way.
 
-## Setup
+## Overview
+v2 is a rebuild of my original Money Moe project, using what I've learned since then to make improvements.
 
-### What's included
+The inspiration for this app came after conversations about how little financial education is taught to children in school. I was curious whether an idea like the classic “lemonade stand” could be brought to life through technology to make learning about money more fun, informative, and interactive.
 
-This repo includes:
+## Features (planned)
+- Guided store setup with choices managed through parent state
+- User limits such as a spending budget
+- POS-style component for adding/deleting items and processing sales
+- Sales saved to a database
+- Admin login to view group of stores through dashboard
 
-* a single, simple API endpoint (`/api/v1/fruits`)
-* frontend routing via react-router
-* an auth0 setup waiting to be configured
-* an example database module (`server/db/fruits.js`)
-* an API client module (`client/apis/fruits.js`)
-* configuration for Vitest and testing library
-* configuration for server-side debugging in VS Code
-* configuration for preprocessing css with tailwind support
+## Tech Stack
+- JavaScript / TypeScript
+- React
+- Node.js / Express
+- CSS
+- SQLite
 
-### Installation
+## What I Learned
+- Restructuring for a better use of react
+- Modelling this version after an admin/dashboard model where a teacher can view progress of their students.
 
-#### **From the Github UI**
+## Project Status
+In progress
 
-See the instructions [here](https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) to use Github's feature to create a new repo from a template.
+## Future Improvements
+- These will be known once the project mvp is complete and I review how it went
 
+## Running the Project Locally
+```bash
+npm install
+npm run dev
 ```
-git clone [your-project-ssh-address]
-cd [your-project-name]
-npm install # to install dependencies
-npm run dev # to start the dev server
-```
-
-You can find the server running on [http://localhost:3000](http://localhost:3000) and the client running on [http://localhost:5173](http://localhost:5173).
-
----
-[Provide feedback on this repo](https://docs.google.com/forms/d/e/1FAIpQLSfw4FGdWkLwMLlUaNQ8FtP2CTJdGDUv6Xoxrh19zIrJSkvT4Q/viewform?usp=pp_url&entry.1958421517=boilerplate-fullstack)
