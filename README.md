@@ -1,4 +1,4 @@
-# Money Moe
+# Money Moe v2
 An educational app for kids to learn about buying and selling. Guided by Moe, users set up their own store to sell goods while learning important financial and business concepts along the way.
 
 ## Overview
