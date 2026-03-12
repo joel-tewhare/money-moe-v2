@@ -50,7 +50,7 @@ export async function seed(knex) {
     {
       id: 6,
       category_id: 1,
-      product_name: 'Muffin',
+      product_name: 'Cupcake',
       cost_cents: 150,
       retail_cents: 350,
       created_at: t0,

@@ -7,7 +7,7 @@
 @layer base {
   html,
   body {
-    @apply bg-moe-green min-h-screen;
+    @apply min-h-screen bg-moe-green;
     font-family: 'Poppins', sans-serif;
   }
   :root {
@@ -71,4 +71,17 @@
     1px -1px 0 #f7fff7,
     -1px 1px 0 #f7fff7,
     1px 1px 0 #f7fff7;
+}
+
+.text-shadow-moe-mint {
+  text-shadow:
+    -1px -1px 0 #5cb87a,
+    1px -1px 0 #5cb87a,
+    -1px 1px 0 #5cb87a,
+    1px 1px 0 #5cb87a;
+}
+
+.border-dashed-moe-cream {
+  border: 4px dashed #f7fff7;
+  border-radius: 1rem;
 }
