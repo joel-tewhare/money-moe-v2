@@ -11,15 +11,16 @@ import Pricing from './components/Pricing'
 import Finalise from './components/Finalise'
 import Pos from './components/Pos'
 import Summary from './components/Summary'
-
 const routes = createRoutesFromElements(
   <Route path="/" element={<App />}>
     <Route index element={<Home />} />
-    <Route path="stock" element={<Stock />} />
-    <Route path="pricing" element={<Pricing />} />
-    <Route path="finalise" element={<Finalise />} />
-    <Route path="pos/:id" element={<Pos />} />
-    <Route path="summary" element={<Summary />} />
+    <Route path="store/:storeId">
+      <Route path="stock" element={<Stock />} />
+      <Route path="pricing" element={<Pricing />} />
+      <Route path="pos" element={<Pos />} />
+      <Route path="summary" element={<Summary />} />
+      <Route path="finalise" element={<Finalise />} />
+    </Route>
   </Route>,
 )
 

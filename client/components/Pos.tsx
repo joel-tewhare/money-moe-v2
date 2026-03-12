@@ -1,3 +1,6 @@
+import { useParams } from 'react-router-dom'
+
 export default function Pos() {
-  return <p>Pos</p>
+  const { storeId } = useParams<{ storeId: string }>()
+  return <p>Pos {storeId}</p>
 }

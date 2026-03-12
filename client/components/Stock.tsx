@@ -1,20 +1,54 @@
+import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Minus, Plus } from 'lucide-react'
 import { getProducts } from '@/client/apis/products'
+import { getStoreSummary } from '@/client/apis/stores'
 import { getImagePath } from '@/lib/utils'
 import { MoePanel } from './moe/MoePanel'
 import { PriceDisplay } from './display/PriceDisplay'
 import { ProductTile } from './product/ProductTile'
 
 export default function Stock() {
+  const { storeId } = useParams<{ storeId: string }>()
+  const storeIdNum = storeId ? Number(storeId) : 0
+
+  const {
+    data: storeSummary,
+    isPending: isStorePending,
+    isError: isStoreError,
+  } = useQuery({
+    queryKey: ['storeSummary', storeIdNum],
+    queryFn: () => getStoreSummary(storeIdNum),
+    enabled: storeIdNum > 0,
+  })
+
   const {
     data: products,
-    isPending,
+    isPending: isProductsPending,
     isError,
   } = useQuery({
-    queryKey: ['products', 1],
-    queryFn: () => getProducts(1),
+    queryKey: ['products', storeSummary?.store.categoryId],
+    queryFn: () => getProducts(storeSummary!.store.categoryId),
+    enabled: !!storeSummary?.store.categoryId,
   })
+
+  const isPending = isStorePending || isProductsPending
+
+  if (storeIdNum <= 0) {
+    return (
+      <div className="mt-8 text-center text-moe-cream">
+        Invalid store. Please start from the home page.
+      </div>
+    )
+  }
+
+  if (isStoreError) {
+    return (
+      <div className="mt-8 text-center text-moe-cream">
+        Store not found. Please start from the home page.
+      </div>
+    )
+  }
 
   if (isPending) {
     return (
@@ -97,6 +131,16 @@ export default function Stock() {
           </div>
         ))}
       </div>
+      {storeId && (
+        <div className="mt-8 flex justify-end">
+          <Link
+            to={`/store/${storeId}/pricing`}
+            className="mr-8 w-fit rounded-md bg-moe-slate px-4 py-3 text-lg font-semibold text-moe-cream shadow-sm transition-colors hover:bg-moe-slate/90"
+          >
+            Next: Pricing
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
