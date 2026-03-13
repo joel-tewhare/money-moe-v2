@@ -14,7 +14,7 @@ export async function seedStoreStock(
   const rows = products.map((p: { id: number; retail_cents: number }) => ({
     store_id: storeId,
     product_id: p.id,
-    quantity: 10,
+    quantity: 0,
     retail_cents: p.retail_cents,
     created_at: now,
     updated_at: now,
