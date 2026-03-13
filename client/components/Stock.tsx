@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Minus, Plus } from 'lucide-react'
@@ -12,6 +13,8 @@ import { ProductTile } from './product/ProductTile'
 export default function Stock() {
   const { storeId } = useParams<{ storeId: string }>()
   const storeIdNum = storeId ? Number(storeId) : 0
+
+  const [quantities, setQuantities] = useState<Record<number, number>>({})
 
   const {
     data: storeSummary,
@@ -45,7 +48,36 @@ export default function Stock() {
   const category = categories?.find(
     (c) => c.id === storeSummary?.store.categoryId,
   )
-  const budgetCents = category?.budgetCents
+  const budgetCents = category?.budgetCents ?? 0
+
+  const totalSpentCents =
+    products?.reduce(
+      (sum, p) => sum + p.costCents * (quantities[p.id] ?? 0),
+      0,
+    ) ?? 0
+
+  const handleIncrease = (productId: number) => {
+    const product = products?.find((p) => p.id === productId)
+    if (!product) return
+    const currentQty = quantities[productId] ?? 0
+    const nextTotal = totalSpentCents + product.costCents
+    if (nextTotal <= budgetCents) {
+      setQuantities((prev) => ({
+        ...prev,
+        [productId]: currentQty + 1,
+      }))
+    }
+  }
+
+  const handleDecrease = (productId: number) => {
+    const currentQty = quantities[productId] ?? 0
+    if (currentQty > 0) {
+      setQuantities((prev) => ({
+        ...prev,
+        [productId]: currentQty - 1,
+      }))
+    }
+  }
 
   const isPending = isStorePending || isProductsPending || isCategoriesPending
 
@@ -95,14 +127,14 @@ export default function Stock() {
                 Failed to load categories. Please try again.
               </p>
             )}
-            {!isCategoriesError && budgetCents == null && (
+            {!isCategoriesError && category?.budgetCents == null && (
               <p className="text-center text-moe-cream">
                 No budget found. Please try again.
               </p>
             )}
-            {!isCategoriesError && budgetCents != null && (
+            {!isCategoriesError && category?.budgetCents != null && (
               <PriceDisplay className="text-shadow-moe-mint-light min-w-[24rem] px-8 py-8 text-center text-6xl font-bold text-moe-mint-light">
-                ${(budgetCents / 100).toFixed(2)}
+                ${(category.budgetCents / 100).toFixed(2)}
               </PriceDisplay>
             )}
           </div>
@@ -111,7 +143,7 @@ export default function Stock() {
               YOU&apos;VE SPENT
             </p>
             <PriceDisplay className="text-shadow-moe-mint-light min-w-[24rem] px-8 py-8 text-center text-6xl font-bold text-moe-mint-light">
-              $25.50
+              ${(totalSpentCents / 100).toFixed(2)}
             </PriceDisplay>
           </div>
         </div>
@@ -128,6 +160,7 @@ export default function Stock() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  onClick={() => handleDecrease(product.id)}
                   className="flex h-8 w-8 cursor-pointer items-center justify-center text-moe-cream hover:opacity-80"
                   aria-label={`Decrease ${product.productName}`}
                 >
@@ -135,6 +168,7 @@ export default function Stock() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => handleIncrease(product.id)}
                   className="flex h-8 w-8 items-center justify-center text-moe-cream hover:opacity-80"
                   aria-label={`Increase ${product.productName}`}
                 >
@@ -152,7 +186,9 @@ export default function Stock() {
                 />
               </ProductTile>
               <p className="text-sm text-moe-cream">{product.productName}</p>
-              <p className="py-4 text-4xl font-bold text-moe-mint-light">0</p>
+              <p className="py-4 text-4xl font-bold text-moe-mint-light">
+                {quantities[product.id] ?? 0}
+              </p>
             </div>
           ))}
       </div>
