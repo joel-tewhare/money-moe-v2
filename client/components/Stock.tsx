@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Minus, Plus } from 'lucide-react'
+import { getProductCategories } from '@/client/apis/product-categories'
 import { getProducts } from '@/client/apis/products'
 import { getStoreSummary } from '@/client/apis/stores'
 import { getImagePath } from '@/lib/utils'
@@ -23,6 +24,15 @@ export default function Stock() {
   })
 
   const {
+    data: categories,
+    isPending: isCategoriesPending,
+    isError: isCategoriesError,
+  } = useQuery({
+    queryKey: ['productCategories'],
+    queryFn: getProductCategories,
+  })
+
+  const {
     data: products,
     isPending: isProductsPending,
     isError,
@@ -32,7 +42,12 @@ export default function Stock() {
     enabled: !!storeSummary?.store.categoryId,
   })
 
-  const isPending = isStorePending || isProductsPending
+  const category = categories?.find(
+    (c) => c.id === storeSummary?.store.categoryId,
+  )
+  const budgetCents = category?.budgetCents
+
+  const isPending = isStorePending || isProductsPending || isCategoriesPending
 
   if (storeIdNum <= 0) {
     return (
@@ -56,14 +71,6 @@ export default function Stock() {
     )
   }
 
-  if (isError) {
-    return (
-      <div className="mt-8 text-center text-moe-cream">
-        Failed to load products. Please try again.
-      </div>
-    )
-  }
-
   return (
     <div className="mt-8 flex flex-col gap-8">
       <div className="mb-14 flex flex-row items-stretch justify-center gap-14">
@@ -83,9 +90,21 @@ export default function Stock() {
             <p className="text-center text-2xl font-bold uppercase text-moe-cream">
               BUDGET
             </p>
-            <PriceDisplay className="text-shadow-moe-mint-light min-w-[24rem] px-8 py-8 text-center text-6xl font-bold text-moe-mint-light">
-              $100.00
-            </PriceDisplay>
+            {isCategoriesError && (
+              <p className="text-center text-moe-cream">
+                Failed to load categories. Please try again.
+              </p>
+            )}
+            {!isCategoriesError && budgetCents == null && (
+              <p className="text-center text-moe-cream">
+                No budget found. Please try again.
+              </p>
+            )}
+            {!isCategoriesError && budgetCents != null && (
+              <PriceDisplay className="text-shadow-moe-mint-light min-w-[24rem] px-8 py-8 text-center text-6xl font-bold text-moe-mint-light">
+                ${(budgetCents / 100).toFixed(2)}
+              </PriceDisplay>
+            )}
           </div>
           <div className="flex flex-col gap-4">
             <p className="text-center text-2xl font-bold uppercase text-moe-cream">
@@ -98,38 +117,44 @@ export default function Stock() {
         </div>
       </div>
       <div className="flex flex-wrap justify-center gap-12">
-        {products?.map((product) => (
-          <div key={product.id} className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="flex h-8 w-8 cursor-pointer items-center justify-center text-moe-cream hover:opacity-80"
-                aria-label={`Decrease ${product.productName}`}
-              >
-                <Minus className="h-5 w-5" strokeWidth={5} />
-              </button>
-              <button
-                type="button"
-                className="flex h-8 w-8 items-center justify-center text-moe-cream hover:opacity-80"
-                aria-label={`Increase ${product.productName}`}
-              >
-                <Plus className="h-5 w-5" strokeWidth={5} />
-              </button>
+        {isError && (
+          <p className="w-full text-center text-moe-cream">
+            Failed to load products. Please try again.
+          </p>
+        )}
+        {!isError &&
+          products?.map((product) => (
+            <div key={product.id} className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center text-moe-cream hover:opacity-80"
+                  aria-label={`Decrease ${product.productName}`}
+                >
+                  <Minus className="h-5 w-5" strokeWidth={5} />
+                </button>
+                <button
+                  type="button"
+                  className="flex h-8 w-8 items-center justify-center text-moe-cream hover:opacity-80"
+                  aria-label={`Increase ${product.productName}`}
+                >
+                  <Plus className="h-5 w-5" strokeWidth={5} />
+                </button>
+              </div>
+              <ProductTile className="flex h-32 w-32 flex-col items-center justify-between rounded-2xl bg-moe-cream p-2">
+                <p className="text-sm text-black">
+                  ${(product.costCents / 100).toFixed(2)}
+                </p>
+                <img
+                  src={getImagePath(product.productName)}
+                  alt={product.productName}
+                  className="h-20 w-20"
+                />
+              </ProductTile>
+              <p className="text-sm text-moe-cream">{product.productName}</p>
+              <p className="py-4 text-4xl font-bold text-moe-mint-light">0</p>
             </div>
-            <ProductTile className="flex h-32 w-32 flex-col items-center justify-between rounded-2xl bg-moe-cream p-2">
-              <p className="text-sm text-black">
-                ${(product.costCents / 100).toFixed(2)}
-              </p>
-              <img
-                src={getImagePath(product.productName)}
-                alt={product.productName}
-                className="h-20 w-20"
-              />
-            </ProductTile>
-            <p className="text-sm text-moe-cream">{product.productName}</p>
-            <p className="py-4 text-4xl font-bold text-moe-mint-light">0</p>
-          </div>
-        ))}
+          ))}
       </div>
       {storeId && (
         <div className="mt-8 flex justify-end">
