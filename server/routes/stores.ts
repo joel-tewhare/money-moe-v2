@@ -14,11 +14,12 @@ router.post('/', async (req, res) => {
     }
     const store = await storesService.createStoreWithStock(
       Number(categoryId),
-      Number(participantId)
+      Number(participantId),
     )
     res.status(201).json(store)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to create store'
+    const message =
+      error instanceof Error ? error.message : 'Failed to create store'
     res.status(500).json({ error: message })
   }
 })
@@ -29,7 +30,8 @@ router.post('/:id/end', async (req, res) => {
     const store = await storesService.endStore(storeId)
     res.json(store)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to end store'
+    const message =
+      error instanceof Error ? error.message : 'Failed to end store'
     if (message === 'Store not found') {
       return res.status(404).json({ error: message })
     }
@@ -52,9 +54,9 @@ router.patch('/:id/stock', async (req, res) => {
     await dbStoreStock.updateStoreStockQuantities(
       storeId,
       Object.fromEntries(
-        Object.entries(quantities).map(([k, v]) => [
-          Number(k),
-          Math.max(0, Number(v)),
+        Object.entries(quantities).map(([key, value]) => [
+          Number(key),
+          Math.max(0, Number(value)),
         ]),
       ),
     )
@@ -72,7 +74,8 @@ router.get('/:id/summary', async (req, res) => {
     const summary = await storesService.getStoreSummary(storeId)
     res.json(summary)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to get store summary'
+    const message =
+      error instanceof Error ? error.message : 'Failed to get store summary'
     if (message === 'Store not found') {
       return res.status(404).json({ error: message })
     }
