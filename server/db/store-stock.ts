@@ -54,6 +54,20 @@ export async function getStockQuantity(
   return row?.quantity ?? 0
 }
 
+export async function updateStoreStockQuantities(
+  storeId: number,
+  quantities: Record<number, number>,
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const now = new Date().toISOString()
+  for (const [productId, quantity] of Object.entries(quantities)) {
+    await connection('store_stock')
+      .where({ store_id: storeId, product_id: Number(productId) })
+      .update({ quantity, updated_at: now })
+  }
+}
+
 export async function decrementStock(
   storeId: number,
   productId: number,

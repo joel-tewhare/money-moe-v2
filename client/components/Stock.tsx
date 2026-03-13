@@ -1,16 +1,17 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Minus, Plus } from 'lucide-react'
 import { getProductCategories } from '@/client/apis/product-categories'
 import { getProducts } from '@/client/apis/products'
-import { getStoreSummary } from '@/client/apis/stores'
+import { getStoreSummary, patchStoreStock } from '@/client/apis/stores'
 import { getImagePath } from '@/lib/utils'
 import { MoePanel } from './moe/MoePanel'
 import { PriceDisplay } from './display/PriceDisplay'
 import { ProductTile } from './product/ProductTile'
 
 export default function Stock() {
+  const navigate = useNavigate()
   const { storeId } = useParams<{ storeId: string }>()
   const storeIdNum = storeId ? Number(storeId) : 0
 
@@ -78,6 +79,20 @@ export default function Stock() {
       }))
     }
   }
+
+  const addStockMutation = useMutation({
+    mutationFn: () =>
+      patchStoreStock(
+        storeIdNum,
+        products?.reduce(
+          (acc, p) => ({ ...acc, [p.id]: quantities[p.id] ?? 0 }),
+          {} as Record<number, number>,
+        ) ?? {},
+      ),
+    onSuccess: () => {
+      navigate(`/store/${storeId}/pricing`)
+    },
+  })
 
   const isPending = isStorePending || isProductsPending || isCategoriesPending
 
@@ -194,12 +209,14 @@ export default function Stock() {
       </div>
       {storeId && (
         <div className="mt-8 flex justify-end">
-          <Link
-            to={`/store/${storeId}/pricing`}
-            className="mr-8 w-fit rounded-md bg-moe-slate px-4 py-3 text-lg font-semibold text-moe-cream shadow-sm transition-colors hover:bg-moe-slate/90"
+          <button
+            type="button"
+            onClick={() => addStockMutation.mutate()}
+            disabled={addStockMutation.isPending}
+            className="mr-8 w-fit rounded-md bg-moe-slate px-4 py-3 text-lg font-semibold text-moe-cream shadow-sm transition-colors hover:bg-moe-slate/90 disabled:opacity-50"
           >
-            Next: Pricing
-          </Link>
+            {addStockMutation.isPending ? 'Adding Stock' : 'Next: Pricing'}
+          </button>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import express from 'express'
+import * as dbStoreStock from '../db/store-stock.js'
 import * as storesService from '../services/stores.js'
 
 const router = express.Router()
@@ -35,6 +36,32 @@ router.post('/:id/end', async (req, res) => {
     if (message === 'Store already ended') {
       return res.status(400).json({ error: message })
     }
+    res.status(500).json({ error: message })
+  }
+})
+
+router.patch('/:id/stock', async (req, res) => {
+  try {
+    const storeId = Number(req.params.id)
+    const { quantities } = req.body
+    if (quantities == null || typeof quantities !== 'object') {
+      return res.status(400).json({
+        error: 'quantities object is required',
+      })
+    }
+    await dbStoreStock.updateStoreStockQuantities(
+      storeId,
+      Object.fromEntries(
+        Object.entries(quantities).map(([k, v]) => [
+          Number(k),
+          Math.max(0, Number(v)),
+        ]),
+      ),
+    )
+    res.status(200).json({ ok: true })
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to update store stock'
     res.status(500).json({ error: message })
   }
 })
