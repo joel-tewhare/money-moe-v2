@@ -19,3 +19,23 @@ export async function getStoreSummary(storeId: number): Promise<StoreSummary> {
   const response = await request.get(`${rootURL}/stores/${storeId}/summary`)
   return response.body
 }
+
+export async function patchStoreStock(
+  storeId: number,
+  quantities: Record<number, number>,
+): Promise<{ ok: boolean }> {
+  const response = await request
+    .patch(`${rootURL}/stores/${storeId}/stock`)
+    .send({ quantities })
+  return response.body
+}
+
+export async function patchStoreStockRetail(
+  storeId: number,
+  items: Array<{ productId: number; retailCents: number }>,
+): Promise<{ ok: boolean }> {
+  const response = await request
+    .patch(`${rootURL}/stores/${storeId}/stock/retail`)
+    .send({ items })
+  return response.body
+}

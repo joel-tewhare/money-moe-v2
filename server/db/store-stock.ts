@@ -14,7 +14,7 @@ export async function seedStoreStock(
   const rows = products.map((p: { id: number; retail_cents: number }) => ({
     store_id: storeId,
     product_id: p.id,
-    quantity: 10,
+    quantity: 0,
     retail_cents: p.retail_cents,
     created_at: now,
     updated_at: now,
@@ -52,6 +52,34 @@ export async function getStockQuantity(
     .select('quantity')
     .first()
   return row?.quantity ?? 0
+}
+
+export async function updateStoreStockRetail(
+  storeId: number,
+  items: Array<{ productId: number; retailCents: number }>,
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const now = new Date().toISOString()
+  for (const { productId, retailCents } of items) {
+    await connection('store_stock')
+      .where({ store_id: storeId, product_id: productId })
+      .update({ retail_cents: retailCents, updated_at: now })
+  }
+}
+
+export async function updateStoreStockQuantities(
+  storeId: number,
+  quantities: Record<number, number>,
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const now = new Date().toISOString()
+  for (const [productId, quantity] of Object.entries(quantities)) {
+    await connection('store_stock')
+      .where({ store_id: storeId, product_id: Number(productId) })
+      .update({ quantity, updated_at: now })
+  }
 }
 
 export async function decrementStock(

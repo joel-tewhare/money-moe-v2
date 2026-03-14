@@ -1,4 +1,5 @@
 import express from 'express'
+import * as dbStoreStock from '../db/store-stock.js'
 import * as storesService from '../services/stores.js'
 
 const router = express.Router()
@@ -13,11 +14,12 @@ router.post('/', async (req, res) => {
     }
     const store = await storesService.createStoreWithStock(
       Number(categoryId),
-      Number(participantId)
+      Number(participantId),
     )
     res.status(201).json(store)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to create store'
+    const message =
+      error instanceof Error ? error.message : 'Failed to create store'
     res.status(500).json({ error: message })
   }
 })
@@ -28,7 +30,8 @@ router.post('/:id/end', async (req, res) => {
     const store = await storesService.endStore(storeId)
     res.json(store)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to end store'
+    const message =
+      error instanceof Error ? error.message : 'Failed to end store'
     if (message === 'Store not found') {
       return res.status(404).json({ error: message })
     }
@@ -39,13 +42,72 @@ router.post('/:id/end', async (req, res) => {
   }
 })
 
+router.patch('/:id/stock/retail', async (req, res) => {
+  try {
+    const storeId = Number(req.params.id)
+    const { items } = req.body
+    if (!Array.isArray(items)) {
+      return res.status(400).json({
+        error: 'items array is required',
+      })
+    }
+    const validItems = items
+      .filter(
+        (x: unknown): x is { productId: number; retailCents: number } =>
+          x != null &&
+          typeof x === 'object' &&
+          typeof (x as { productId?: unknown }).productId === 'number' &&
+          typeof (x as { retailCents?: unknown }).retailCents === 'number',
+      )
+      .map((x) => ({
+        productId: x.productId,
+        retailCents: Math.max(0, x.retailCents),
+      }))
+    await dbStoreStock.updateStoreStockRetail(storeId, validItems)
+    res.status(200).json({ ok: true })
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Failed to update store stock retail'
+    res.status(500).json({ error: message })
+  }
+})
+
+router.patch('/:id/stock', async (req, res) => {
+  try {
+    const storeId = Number(req.params.id)
+    const { quantities } = req.body
+    if (quantities == null || typeof quantities !== 'object') {
+      return res.status(400).json({
+        error: 'quantities object is required',
+      })
+    }
+    await dbStoreStock.updateStoreStockQuantities(
+      storeId,
+      Object.fromEntries(
+        Object.entries(quantities).map(([key, value]) => [
+          Number(key),
+          Math.max(0, Number(value)),
+        ]),
+      ),
+    )
+    res.status(200).json({ ok: true })
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to update store stock'
+    res.status(500).json({ error: message })
+  }
+})
+
 router.get('/:id/summary', async (req, res) => {
   try {
     const storeId = Number(req.params.id)
     const summary = await storesService.getStoreSummary(storeId)
     res.json(summary)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to get store summary'
+    const message =
+      error instanceof Error ? error.message : 'Failed to get store summary'
     if (message === 'Store not found') {
       return res.status(404).json({ error: message })
     }
