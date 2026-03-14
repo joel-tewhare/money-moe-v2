@@ -54,6 +54,20 @@ export async function getStockQuantity(
   return row?.quantity ?? 0
 }
 
+export async function updateStoreStockRetail(
+  storeId: number,
+  items: Array<{ productId: number; retailCents: number }>,
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const now = new Date().toISOString()
+  for (const { productId, retailCents } of items) {
+    await connection('store_stock')
+      .where({ store_id: storeId, product_id: productId })
+      .update({ retail_cents: retailCents, updated_at: now })
+  }
+}
+
 export async function updateStoreStockQuantities(
   storeId: number,
   quantities: Record<number, number>,

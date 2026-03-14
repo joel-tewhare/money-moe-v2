@@ -29,3 +29,13 @@ export async function patchStoreStock(
     .send({ quantities })
   return response.body
 }
+
+export async function patchStoreStockRetail(
+  storeId: number,
+  items: Array<{ productId: number; retailCents: number }>,
+): Promise<{ ok: boolean }> {
+  const response = await request
+    .patch(`${rootURL}/stores/${storeId}/stock/retail`)
+    .send({ items })
+  return response.body
+}
