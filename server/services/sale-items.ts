@@ -25,7 +25,12 @@ export async function createSaleItemWithStockDecrement(
     if (!product) {
       throw new Error('Product not found')
     }
-    const retailCents = product.retailCents
+    const storeRetailCents = await dbStoreStock.getStoreStockRetailCents(
+      storeId,
+      productId,
+      trx,
+    )
+    const retailCents = storeRetailCents ?? product.costCents
     const costCents = product.costCents
     const lineTotalCents = retailCents * quantity
     const saleItem = await dbSaleItems.createSaleItem(

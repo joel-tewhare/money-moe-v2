@@ -9,13 +9,13 @@ export async function seedStoreStock(
   const connection = trx ?? db
   const products = await connection('products')
     .where('category_id', categoryId)
-    .select('id', 'retail_cents')
+    .select('id')
   const now = new Date().toISOString()
-  const rows = products.map((p: { id: number; retail_cents: number }) => ({
+  const rows = products.map((p: { id: number }) => ({
     store_id: storeId,
     product_id: p.id,
     quantity: 0,
-    retail_cents: p.retail_cents,
+    retail_cents: null,
     created_at: now,
     updated_at: now,
   }))
@@ -52,6 +52,19 @@ export async function getStockQuantity(
     .select('quantity')
     .first()
   return row?.quantity ?? 0
+}
+
+export async function getStoreStockRetailCents(
+  storeId: number,
+  productId: number,
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const row = await connection('store_stock')
+    .where({ store_id: storeId, product_id: productId })
+    .select('retail_cents')
+    .first()
+  return row?.retail_cents ?? null
 }
 
 export async function updateStoreStockRetail(

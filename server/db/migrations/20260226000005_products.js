@@ -8,7 +8,6 @@ export function up(knex) {
       .inTable('product_categories')
     table.string('product_name').notNullable()
     table.integer('cost_cents').notNullable()
-    table.integer('retail_cents').notNullable()
     table.timestamps(true, true)
   })
 }

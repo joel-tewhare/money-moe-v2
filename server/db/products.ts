@@ -8,7 +8,6 @@ export async function getProducts(categoryId?: number, trx?: Knex.Transaction) {
     'category_id as categoryId',
     'product_name as productName',
     'cost_cents as costCents',
-    'retail_cents as retailCents',
     'created_at as createdAt',
     'updated_at as updatedAt',
   )
@@ -27,7 +26,6 @@ export async function getProductById(id: number, trx?: Knex.Transaction) {
       'category_id as categoryId',
       'product_name as productName',
       'cost_cents as costCents',
-      'retail_cents as retailCents',
       'created_at as createdAt',
       'updated_at as updatedAt',
     )

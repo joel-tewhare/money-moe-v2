@@ -3,7 +3,6 @@ export interface Product {
   categoryId: number
   productName: string
   costCents: number
-  retailCents: number
   createdAt: string
   updatedAt: string
 }
