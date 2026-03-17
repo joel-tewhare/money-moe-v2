@@ -10,6 +10,24 @@ export async function getClassIdByCode(code: string, trx?: Knex.Transaction) {
   return row?.id ?? null
 }
 
+export async function getParticipantById(
+  id: number,
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const row = await connection('participants')
+    .where('id', id)
+    .select(
+      'id',
+      'class_id as classId',
+      'display_name as displayName',
+      'created_at as createdAt',
+      'updated_at as updatedAt',
+    )
+    .first()
+  return row
+}
+
 export async function createParticipant(
   displayName: string,
   classId: number | null,

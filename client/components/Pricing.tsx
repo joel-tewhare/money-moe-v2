@@ -3,10 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Minus, Plus } from 'lucide-react'
 import { getProducts } from '@/client/apis/products'
-import {
-  getStoreSummary,
-  patchStoreStockRetail,
-} from '@/client/apis/stores'
+import { getStoreSummary, patchStoreStockRetail } from '@/client/apis/stores'
 import { getImagePath } from '@/lib/utils'
 import { MoePanel } from './moe/MoePanel'
 import { ProductTile } from './product/ProductTile'
@@ -85,7 +82,7 @@ export default function Pricing() {
         })),
       ),
     onSuccess: () => {
-      navigate(`/store/${storeId}/summary`)
+      navigate(`/store/${storeId}/finalise`)
     },
   })
 
@@ -109,9 +106,7 @@ export default function Pricing() {
 
   if (isPending) {
     return (
-      <div className="mt-8 text-center text-moe-cream">
-        Loading products...
-      </div>
+      <div className="mt-8 text-center text-moe-cream">Loading products...</div>
     )
   }
 
@@ -134,13 +129,13 @@ export default function Pricing() {
             RETAIL PRICES
           </p>
           <div className="mx-auto grid max-w-max grid-cols-2 justify-items-center gap-12">
-        {isProductsError && (
-          <p className="col-span-2 w-full text-center text-moe-cream">
-            Failed to load products. Please try again.
-          </p>
-        )}
-        {!isProductsError &&
-          displayedItems.map((item) => {
+            {isProductsError && (
+              <p className="col-span-2 w-full text-center text-moe-cream">
+                Failed to load products. Please try again.
+              </p>
+            )}
+            {!isProductsError &&
+              displayedItems.map((item) => {
                 const currentRetail = getCurrentRetail(item)
                 const percentage = getPercentage(currentRetail, item.costCents)
                 return (
@@ -186,7 +181,7 @@ export default function Pricing() {
                     <p className="text-sm text-moe-cream">{item.productName}</p>
                   </div>
                 )
-          })}
+              })}
           </div>
         </div>
       </div>
@@ -200,9 +195,7 @@ export default function Pricing() {
             }
             className="mr-8 w-fit rounded-md bg-moe-slate px-4 py-3 text-lg font-semibold text-moe-cream shadow-sm transition-colors hover:bg-moe-slate/90 disabled:opacity-50"
           >
-            {saveRetailMutation.isPending
-              ? 'Saving Prices'
-              : 'Next: Summary'}
+            {saveRetailMutation.isPending ? 'Saving Prices' : 'Next: Summary'}
           </button>
         </div>
       )}

@@ -3,6 +3,18 @@ import * as db from '../db/participants.js'
 
 const router = express.Router()
 
+router.get('/:id', async (req, res) => {
+  try {
+    const participant = await db.getParticipantById(Number(req.params.id))
+    if (!participant) {
+      return res.status(404).json({ error: 'Participant not found' })
+    }
+    res.json(participant)
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get participant' })
+  }
+})
+
 router.post('/', async (req, res) => {
   try {
     const { displayName, classCode } = req.body
