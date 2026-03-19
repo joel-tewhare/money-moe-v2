@@ -4,6 +4,7 @@ import * as dbSales from '../db/sales.js'
 import * as dbStores from '../db/stores.js'
 import * as dbStoreStock from '../db/store-stock.js'
 import db from '../db/connection.js'
+import { SaleItem } from '@/models/sale-items.js'
 
 export async function processCheckout(
   storeId: number,
@@ -20,8 +21,7 @@ export async function processCheckout(
     }
 
     const sale = await dbSales.createSale(storeId, trx)
-    const saleItems: Awaited<ReturnType<typeof dbSaleItems.createSaleItem>>[] =
-      []
+    const saleItems: SaleItem[] = []
 
     for (const { productId, quantity } of items) {
       if (quantity <= 0) {
