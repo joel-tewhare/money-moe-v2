@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { checkout } from '@/client/apis/checkout'
-import { getStoreSummary } from '@/client/apis/stores'
-import { getImagePath } from '@/lib/utils'
+import { endStore, getStoreSummary } from '@/client/apis/stores'
+import { getApiErrorMessage, getImagePath } from '@/lib/utils'
 import { MoePanel } from './moe/MoePanel'
 import { ProductTile } from './product/ProductTile'
 import type { StoreStockSummary } from '@/models/store-summary'
@@ -15,31 +15,16 @@ type CartLine = {
   quantity: number
 }
 
-function getCheckoutErrorMessage(err: unknown): string {
-  if (
-    err != null &&
-    typeof err === 'object' &&
-    'response' in err &&
-    err.response != null &&
-    typeof err.response === 'object' &&
-    'body' in err.response &&
-    err.response.body != null &&
-    typeof err.response.body === 'object' &&
-    'error' in err.response.body &&
-    typeof (err.response.body as { error: unknown }).error === 'string'
-  ) {
-    return (err.response.body as { error: string }).error
-  }
-  return 'Checkout failed. Please try again.'
-}
-
 export default function Pos() {
   const { storeId } = useParams<{ storeId: string }>()
   const storeIdNum = storeId ? Number(storeId) : 0
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const [cart, setCart] = useState<Record<number, CartLine>>({})
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [closeStoreModalOpen, setCloseStoreModalOpen] = useState(false)
+  const [closeStoreError, setCloseStoreError] = useState<string | null>(null)
 
   const {
     data: storeSummary,
@@ -127,7 +112,24 @@ export default function Pos() {
       })
     },
     onError: (err: unknown) => {
-      setCheckoutError(getCheckoutErrorMessage(err))
+      setCheckoutError(
+        getApiErrorMessage(err, 'Checkout failed. Please try again.'),
+      )
+    },
+  })
+
+  const closeStoreMutation = useMutation({
+    mutationFn: () => endStore(storeIdNum),
+    onSuccess: () => {
+      setCloseStoreError(null)
+      setCloseStoreModalOpen(false)
+      navigate(`/store/${storeId}/summary`)
+    },
+    onError: (err: unknown) => {
+      setCloseStoreModalOpen(false)
+      setCloseStoreError(
+        getApiErrorMessage(err, 'Could not close the store. Please try again.'),
+      )
     },
   })
 
@@ -138,6 +140,21 @@ export default function Pos() {
     }
     setCheckoutError(null)
     checkoutMutation.mutate()
+  }
+
+  const openCloseStoreModal = () => {
+    setCloseStoreError(null)
+    setCloseStoreModalOpen(true)
+  }
+
+  const cancelCloseStore = () => {
+    if (!closeStoreMutation.isPending) {
+      setCloseStoreModalOpen(false)
+    }
+  }
+
+  const confirmCloseStore = () => {
+    closeStoreMutation.mutate()
   }
 
   if (storeIdNum <= 0) {
@@ -228,8 +245,8 @@ export default function Pos() {
         </div>
 
         <div className="flex max-h-[85vh] min-h-[32rem] flex-1 flex-col lg:min-h-[52rem] lg:max-w-md">
-          <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-moe-cream p-6 shadow-md">
-            <p className="mb-6 shrink-0 text-center text-xl font-bold uppercase text-moe-slate">
+          <div className="mb-6 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-moe-cream p-5 shadow-md">
+            <p className="mb-4 shrink-0 text-center text-xl font-bold uppercase text-moe-slate">
               New Sale
             </p>
             <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain">
@@ -264,7 +281,7 @@ export default function Pos() {
                 })
               )}
             </div>
-            <div className="mt-6 flex shrink-0 items-center justify-between border-t-2 border-moe-slate/20 pt-4 font-bold text-moe-slate">
+            <div className="mt-4 flex shrink-0 items-center justify-between border-t-2 border-moe-slate/20 pt-3 font-bold text-moe-slate">
               <span>TOTAL</span>
               <span>${(totalCents / 100).toFixed(2)}</span>
             </div>
@@ -275,13 +292,81 @@ export default function Pos() {
               type="button"
               onClick={handleCheckout}
               disabled={checkoutMutation.isPending}
-              className="mx-auto mb-2 mt-2 w-auto shrink-0 rounded-full bg-moe-mint px-10 py-5 text-4xl font-black uppercase leading-tight text-moe-slate shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
+              className="mx-auto mb-1 mt-1 w-auto shrink-0 rounded-full bg-moe-mint px-10 py-5 text-4xl font-black uppercase leading-tight text-moe-slate shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
             >
               {checkoutMutation.isPending ? 'Checking out' : 'Checkout'}
             </button>
           </div>
+
+          <div className="border-dashed-moe-cream shrink-0 px-6 py-8 lg:px-8 lg:py-10">
+            <div className="flex flex-row items-center justify-between gap-5">
+              <p className="max-w-[min(16rem,58%)] text-left text-base font-medium leading-snug text-moe-cream lg:text-lg">
+                Finished selling?
+                <br />
+                Click this button
+              </p>
+              <div className="flex shrink-0 flex-col items-end gap-2">
+                <button
+                  type="button"
+                  onClick={openCloseStoreModal}
+                  disabled={closeStoreMutation.isPending}
+                  className="rounded-full bg-moe-mint px-6 py-3.5 text-center text-sm font-black uppercase tracking-wide text-moe-green shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
+                >
+                  {closeStoreMutation.isPending ? 'Closing' : 'Close store'}
+                </button>
+                {closeStoreError ? (
+                  <p className="max-w-[12rem] text-right text-sm font-medium text-moe-slate">
+                    {closeStoreError}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {closeStoreModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close dialog"
+            disabled={closeStoreMutation.isPending}
+            onClick={cancelCloseStore}
+            className="absolute inset-0 bg-moe-slate/55 backdrop-blur-md transition-opacity disabled:pointer-events-none"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="close-store-dialog-title"
+            className="relative z-10 w-full max-w-md rounded-2xl border-4 border-moe-mint bg-moe-cream p-8 shadow-xl"
+          >
+            <h2
+              id="close-store-dialog-title"
+              className="text-center text-lg font-bold text-moe-slate"
+            >
+              Are you sure you want to close your store?
+            </h2>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+              <button
+                type="button"
+                onClick={confirmCloseStore}
+                disabled={closeStoreMutation.isPending}
+                className="rounded-full bg-moe-mint px-8 py-3 text-sm font-black uppercase text-moe-slate shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
+              >
+                {closeStoreMutation.isPending ? 'Closing…' : 'Yes'}
+              </button>
+              <button
+                type="button"
+                onClick={cancelCloseStore}
+                disabled={closeStoreMutation.isPending}
+                className="rounded-full border-2 border-moe-slate/30 bg-moe-cream px-8 py-3 text-sm font-bold uppercase text-moe-slate transition-colors hover:bg-moe-slate/5 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
