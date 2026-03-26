@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { checkout } from '@/client/apis/checkout'
 import { getStoreSummary } from '@/client/apis/stores'
 import { getImagePath } from '@/lib/utils'
 import { MoePanel } from './moe/MoePanel'
@@ -14,11 +15,31 @@ type CartLine = {
   quantity: number
 }
 
+function getCheckoutErrorMessage(err: unknown): string {
+  if (
+    err != null &&
+    typeof err === 'object' &&
+    'response' in err &&
+    err.response != null &&
+    typeof err.response === 'object' &&
+    'body' in err.response &&
+    err.response.body != null &&
+    typeof err.response.body === 'object' &&
+    'error' in err.response.body &&
+    typeof (err.response.body as { error: unknown }).error === 'string'
+  ) {
+    return (err.response.body as { error: string }).error
+  }
+  return 'Checkout failed. Please try again.'
+}
+
 export default function Pos() {
   const { storeId } = useParams<{ storeId: string }>()
   const storeIdNum = storeId ? Number(storeId) : 0
+  const queryClient = useQueryClient()
 
   const [cart, setCart] = useState<Record<number, CartLine>>({})
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
 
   const {
     data: storeSummary,
@@ -36,6 +57,7 @@ export default function Pos() {
   )
 
   const addProduct = (item: StoreStockSummary) => {
+    setCheckoutError(null)
     const retailCents = item.retailCents ?? 0
     setCart((prev) => {
       const currentQty = prev[item.productId]?.quantity ?? 0
@@ -54,6 +76,7 @@ export default function Pos() {
   }
 
   const removeOneUnit = (productId: number) => {
+    setCheckoutError(null)
     setCart((prev) => {
       const line = prev[productId]
       if (!line) return prev
@@ -86,6 +109,36 @@ export default function Pos() {
       ),
     [cartEntries],
   )
+
+  const checkoutMutation = useMutation({
+    mutationFn: () =>
+      checkout({
+        storeId: storeIdNum,
+        items: cartEntries.map(({ productId, quantity }) => ({
+          productId,
+          quantity,
+        })),
+      }),
+    onSuccess: () => {
+      setCheckoutError(null)
+      setCart({})
+      void queryClient.invalidateQueries({
+        queryKey: ['storeSummary', storeIdNum],
+      })
+    },
+    onError: (err: unknown) => {
+      setCheckoutError(getCheckoutErrorMessage(err))
+    },
+  })
+
+  const handleCheckout = () => {
+    if (cartEntries.length === 0) {
+      setCheckoutError('Add at least one item to the cart before checking out.')
+      return
+    }
+    setCheckoutError(null)
+    checkoutMutation.mutate()
+  }
 
   if (storeIdNum <= 0) {
     return (
@@ -215,11 +268,16 @@ export default function Pos() {
               <span>TOTAL</span>
               <span>${(totalCents / 100).toFixed(2)}</span>
             </div>
+            <div className="mt-2 min-h-[3rem] shrink-0 text-center text-sm font-medium text-red-700">
+              {checkoutError}
+            </div>
             <button
               type="button"
-              className="mt-6 w-full shrink-0 rounded-full bg-moe-mint py-4 text-lg font-bold uppercase text-moe-slate shadow-sm transition-colors hover:opacity-90"
+              onClick={handleCheckout}
+              disabled={checkoutMutation.isPending}
+              className="mx-auto mb-2 mt-2 w-auto shrink-0 rounded-full bg-moe-mint px-10 py-5 text-4xl font-black uppercase leading-tight text-moe-slate shadow-sm transition-colors hover:opacity-90 disabled:opacity-50"
             >
-              Checkout
+              {checkoutMutation.isPending ? 'Checking out' : 'Checkout'}
             </button>
           </div>
         </div>
