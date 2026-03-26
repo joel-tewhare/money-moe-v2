@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getStoreSummary } from '@/client/apis/stores'
 import { getImagePath } from '@/lib/utils'
+import { MoePanel } from './moe/MoePanel'
 import { ProductTile } from './product/ProductTile'
 import type { StoreStockSummary } from '@/models/store-summary'
 
@@ -107,45 +109,73 @@ export default function Pos() {
 
   return (
     <div className="mt-8 flex flex-col items-center gap-8">
-      <div className="flex w-full max-w-6xl flex-col items-center justify-center gap-10 lg:flex-row lg:items-start lg:gap-14">
-        <div className="flex w-fit shrink-0 flex-col">
-          <div className="border-dashed-moe-cream rounded-2xl p-12">
-            <div className="grid max-w-max grid-cols-3 justify-items-center gap-12">
-              {sellableItems.map((item) => (
-                <div
-                  key={item.productId}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <button
-                    type="button"
-                    onClick={() => addProduct(item)}
-                    disabled={
-                      (cart[item.productId]?.quantity ?? 0) >= item.quantity
-                    }
-                    className="flex flex-col items-center gap-2 rounded-2xl transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+      <div className="flex w-full max-w-6xl flex-col items-stretch justify-center gap-10 lg:flex-row lg:gap-14">
+        <div className="flex max-h-[85vh] min-h-[32rem] flex-1 flex-col gap-5 lg:min-h-[52rem]">
+          <div className="w-full shrink-0">
+            <div className="border-dashed-moe-cream rounded-2xl p-16 lg:p-20">
+              <div className="grid w-full grid-cols-3 justify-items-center gap-14 lg:gap-16">
+                {sellableItems.map((item) => (
+                  <div
+                    key={item.productId}
+                    className="flex flex-col items-center gap-2"
                   >
-                    <ProductTile className="flex h-32 w-32 flex-col items-center justify-start gap-2 rounded-2xl bg-moe-cream p-2">
-                      <span className="rounded-full bg-moe-mint-light/60 px-3 py-1 text-sm font-medium text-moe-slate">
-                        ${((item.retailCents ?? 0) / 100).toFixed(2)}
-                      </span>
-                      <img
-                        src={getImagePath(item.productName)}
-                        alt={item.productName}
-                        className="h-20 w-20"
-                      />
-                    </ProductTile>
-                  </button>
-                  <p className="text-center text-sm text-moe-cream">
-                    {item.productName} ({item.quantity})
-                  </p>
-                </div>
-              ))}
+                    <button
+                      type="button"
+                      onClick={() => addProduct(item)}
+                      disabled={
+                        (cart[item.productId]?.quantity ?? 0) >= item.quantity
+                      }
+                      className="flex flex-col items-center gap-2 rounded-2xl transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <ProductTile className="flex h-36 w-36 flex-col items-center justify-start gap-2 rounded-2xl bg-moe-cream p-2">
+                        <span className="rounded-full bg-moe-mint-light/60 px-3 py-1 text-sm font-medium text-moe-slate">
+                          ${((item.retailCents ?? 0) / 100).toFixed(2)}
+                        </span>
+                        <img
+                          src={getImagePath(item.productName)}
+                          alt={item.productName}
+                          className="h-24 w-24"
+                        />
+                      </ProductTile>
+                    </button>
+                    <p className="text-center text-sm text-moe-cream">
+                      {item.productName} ({item.quantity})
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col justify-end">
+            <MoePanel className="flex w-full flex-row items-center gap-4 p-6 text-moe-cream">
+              <img
+                src="/assets/moe/moe-4.png"
+                alt="Moe"
+                className="h-44 w-auto max-w-[42%] shrink-0 object-contain sm:h-52"
+              />
+              <div className="flex min-w-0 flex-1 flex-row items-center gap-2">
+                <ChevronLeft
+                  className="h-6 w-6 shrink-0 text-moe-cream"
+                  strokeWidth={2}
+                  aria-hidden
+                />
+                <p className="text-sm">
+                  Instructions and educational information goes here in the
+                  voice of MOE. Arrows slide to more information.
+                </p>
+                <ChevronRight
+                  className="h-6 w-6 shrink-0 text-moe-cream"
+                  strokeWidth={2}
+                  aria-hidden
+                />
+              </div>
+            </MoePanel>
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col lg:max-w-md">
-          <div className="flex max-h-[85vh] min-h-[32rem] flex-col overflow-hidden rounded-2xl bg-moe-cream p-6 shadow-md lg:min-h-[52rem]">
+        <div className="flex max-h-[85vh] min-h-[32rem] flex-1 flex-col lg:min-h-[52rem] lg:max-w-md">
+          <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-moe-cream p-6 shadow-md">
             <p className="mb-6 shrink-0 text-center text-xl font-bold uppercase text-moe-slate">
               New Sale
             </p>
