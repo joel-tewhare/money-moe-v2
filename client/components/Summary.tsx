@@ -1,12 +1,14 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { getStoreSummary } from '@/client/apis/stores'
 import { MoePanel } from './moe/MoePanel'
 
-const PLACEHOLDER_TOTALS = {
-  revenue: '$100.00',
-  cost: '$33.00',
-  profit: '$67.00',
-} as const
+function formatCentsToDollars(cents: number | null | undefined): string {
+  const num =
+    typeof cents === 'number' && Number.isFinite(cents) ? Math.trunc(cents) : 0
+  return `$${(num / 100).toFixed(2)}`
+}
 
 function SummaryMetricRow({ label, value }: { label: string; value: string }) {
   return (
@@ -23,6 +25,49 @@ function SummaryMetricRow({ label, value }: { label: string; value: string }) {
 
 export default function Summary() {
   const navigate = useNavigate()
+  const { storeId } = useParams<{ storeId: string }>()
+  const storeIdNum = storeId ? Number(storeId) : 0
+
+  const {
+    data: storeSummary,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ['storeSummary', storeIdNum],
+    queryFn: () => getStoreSummary(storeIdNum),
+    enabled: storeIdNum > 0,
+  })
+
+  if (storeIdNum <= 0) {
+    return (
+      <div className="mt-8 px-4 text-center text-moe-cream">
+        Invalid store. Please start from the home page.
+      </div>
+    )
+  }
+
+  if (isPending) {
+    return (
+      <div className="mt-8 px-4 text-center text-moe-cream">Loading...</div>
+    )
+  }
+
+  if (isError || storeSummary == null) {
+    return (
+      <div className="mt-8 px-4 text-center text-moe-cream">
+        Store summary could not be loaded. Please start from the home page.
+      </div>
+    )
+  }
+
+  const totalRevenueCents =
+    storeSummary.totalRevenueCents ??
+    storeSummary.store.totalRevenueCents ??
+    null
+  const totalCostCents =
+    storeSummary.totalCostCents ?? storeSummary.store.totalCostCents ?? null
+  const profitCents =
+    storeSummary.profitCents ?? storeSummary.store.profitCents ?? null
 
   return (
     <div className="mt-8 flex flex-col items-center gap-8 px-4 pb-12">
@@ -60,15 +105,21 @@ export default function Summary() {
           <div className="flex flex-col gap-4">
             <SummaryMetricRow
               label="Total revenue"
-              value={PLACEHOLDER_TOTALS.revenue}
+              value={
+                totalRevenueCents
+                  ? formatCentsToDollars(totalRevenueCents)
+                  : '—'
+              }
             />
             <SummaryMetricRow
               label="Total cost"
-              value={PLACEHOLDER_TOTALS.cost}
+              value={
+                totalCostCents ? formatCentsToDollars(totalCostCents) : '—'
+              }
             />
             <SummaryMetricRow
               label="Profit made"
-              value={PLACEHOLDER_TOTALS.profit}
+              value={profitCents ? formatCentsToDollars(profitCents) : '—'}
             />
           </div>
         </div>
