@@ -4,6 +4,18 @@ export interface StoreStockSummary {
   quantity: number
   retailCents: number | null
 }
+export interface StoreSummaryBestseller {
+  productId: number
+  productName: string
+  quantitySold: number
+  revenueCents: number
+}
+export interface StoreSummaryTopEarner {
+  productId: number
+  productName: string
+  profitCents: number
+  quantitySold: number
+}
 
 export interface StoreSummary {
   store: {
@@ -20,4 +32,6 @@ export interface StoreSummary {
   totalRevenueCents: number
   totalCostCents: number
   profitCents: number
+  bestseller: StoreSummaryBestseller | null
+  topEarner: StoreSummaryTopEarner | null
 }
