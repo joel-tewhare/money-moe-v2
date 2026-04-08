@@ -2,7 +2,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getStoreSummary } from '@/client/apis/stores'
+import { getImagePath } from '@/lib/utils'
 import { MoePanel } from './moe/MoePanel'
+
+const FALLBACK_PRODUCT_IMAGE = '/assets/products/plate.png'
 
 function formatCentsToDollars(cents: number | null | undefined): string {
   const num =
@@ -69,6 +72,22 @@ export default function Summary() {
   const profitCents =
     storeSummary.profitCents ?? storeSummary.store.profitCents ?? null
 
+  const bestseller = storeSummary.bestseller
+  const topEarner = storeSummary.topEarner
+
+  const bestsellerName =
+    bestseller != null &&
+    typeof bestseller.productName === 'string' &&
+    bestseller.productName.trim().length > 0
+      ? bestseller.productName.trim()
+      : null
+  const topEarnerName =
+    topEarner != null &&
+    typeof topEarner.productName === 'string' &&
+    topEarner.productName.trim().length > 0
+      ? topEarner.productName.trim()
+      : null
+
   return (
     <div className="mt-8 flex flex-col items-center gap-8 px-4 pb-12">
       <div className="flex w-full max-w-6xl flex-col items-stretch gap-10 lg:flex-row lg:gap-14">
@@ -78,27 +97,51 @@ export default function Summary() {
               <h2 className="text-center text-xs font-bold uppercase leading-tight tracking-wide text-moe-slate sm:text-sm">
                 Your bestseller
               </h2>
-              <img
-                src="/assets/products/cupcake.png"
-                alt=""
-                className="h-28 w-28 object-contain sm:h-32 sm:w-32"
-              />
-              <p className="text-center text-sm font-medium text-moe-slate">
-                Cupcake
-              </p>
+              {bestseller != null && bestsellerName != null ? (
+                <>
+                  <img
+                    src={getImagePath(bestsellerName)}
+                    alt=""
+                    className="h-28 w-28 object-contain sm:h-32 sm:w-32"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src = FALLBACK_PRODUCT_IMAGE
+                    }}
+                  />
+                  <p className="text-center text-sm font-medium text-moe-slate">
+                    {bestsellerName}
+                  </p>
+                </>
+              ) : (
+                <p className="text-center text-sm text-moe-slate/70">
+                  No bestseller for this session.
+                </p>
+              )}
             </div>
             <div className="flex flex-col items-center gap-4 rounded-2xl bg-moe-cream p-5 shadow-md lg:p-6">
               <h2 className="text-center text-xs font-bold uppercase leading-tight tracking-wide text-moe-slate sm:text-sm">
                 Your top earner
               </h2>
-              <img
-                src="/assets/products/sandwich.png"
-                alt=""
-                className="h-28 w-28 object-contain sm:h-32 sm:w-32"
-              />
-              <p className="text-center text-sm font-medium text-moe-slate">
-                Sandwich
-              </p>
+              {topEarner != null && topEarnerName != null ? (
+                <>
+                  <img
+                    src={getImagePath(topEarnerName)}
+                    alt=""
+                    className="h-28 w-28 object-contain sm:h-32 sm:w-32"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src = FALLBACK_PRODUCT_IMAGE
+                    }}
+                  />
+                  <p className="text-center text-sm font-medium text-moe-slate">
+                    {topEarnerName}
+                  </p>
+                </>
+              ) : (
+                <p className="text-center text-sm text-moe-slate/70">
+                  No top earner for this session.
+                </p>
+              )}
             </div>
           </div>
 
