@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { MoePanel } from '../moe/MoePanel'
 
-function StubMetricRow({ label, value }: { label: string; value: string }) {
+function EndedListRows({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 rounded-full bg-moe-cream px-5 py-4 shadow-sm">
       <span className="text-sm font-bold uppercase tracking-wide text-moe-slate lg:text-base">
@@ -71,9 +71,9 @@ export function TeacherStoreSummaryStub({ onBack }: Props) {
             </div>
 
             <div className="flex flex-col gap-4">
-              <StubMetricRow label="Total revenue" value="$0.00" />
-              <StubMetricRow label="Total cost" value="$0.00" />
-              <StubMetricRow label="Profit made" value="$0.00" />
+              <EndedListRows label="Total revenue" value="$0.00" />
+              <EndedListRows label="Total cost" value="$0.00" />
+              <EndedListRows label="Profit made" value="$0.00" />
             </div>
           </div>
 
