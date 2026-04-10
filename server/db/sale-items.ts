@@ -50,3 +50,24 @@ export async function getSaleItemsForTotals(
     )
   return rows
 }
+
+export async function getSaleItemsBySaleIds(
+  saleIds: number[],
+  trx?: Knex.Transaction,
+) {
+  if (saleIds.length === 0) {
+    return []
+  }
+  const connection = trx ?? db
+  const rows = await connection('sale_items')
+    .whereIn('sale_id', saleIds)
+    .join('products', 'sale_items.product_id', 'products.id')
+    .select(
+      'sale_items.product_id as productId',
+      'products.product_name as productName',
+      'sale_items.quantity',
+      'sale_items.cost_cents as costCents',
+      'sale_items.line_total_cents as lineTotalCents',
+    )
+  return rows
+}
