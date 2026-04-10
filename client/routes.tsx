@@ -11,9 +11,14 @@ import Pricing from './components/Pricing'
 import Finalise from './components/Finalise'
 import Pos from './components/Pos'
 import Summary from './components/Summary'
+import TeacherClassCodeEntry from './components/teacher/TeacherClassCodeEntry'
+import TeacherDashboard from './components/teacher/TeacherDashboard'
+
 const routes = createRoutesFromElements(
   <Route path="/" element={<App />}>
     <Route index element={<Home />} />
+    <Route path="teacher" element={<TeacherClassCodeEntry />} />
+    <Route path="teacher/dashboard" element={<TeacherDashboard />} />
     <Route path="store/:storeId">
       <Route path="stock" element={<Stock />} />
       <Route path="pricing" element={<Pricing />} />
