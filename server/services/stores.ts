@@ -2,6 +2,7 @@ import * as dbStores from '../db/stores.js'
 import * as dbStoreStock from '../db/store-stock.js'
 import * as dbSales from '../db/sales.js'
 import * as dbSaleItems from '../db/sale-items.js'
+import * as dbParticipants from '../db/participants.js'
 import db from '../db/connection.js'
 import type {
   StoreSummaryBestseller,
@@ -203,4 +204,15 @@ export async function getStoreSummary(storeId: number) {
     bestseller,
     topEarner,
   }
+}
+
+export async function getStoresForTeacherDashboard(classCode: string) {
+  const cleanCode = classCode.trim()
+  const classId = await dbParticipants.getClassIdByCode(cleanCode)
+
+  if (classId == null) {
+    throw new Error('Class not found')
+  }
+
+  return dbStores.getStoresByClassId(classId)
 }

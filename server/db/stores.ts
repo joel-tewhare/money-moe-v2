@@ -52,6 +52,24 @@ export async function getStoreById(id: number, trx?: Knex.Transaction) {
   return row
 }
 
+export async function getStoresByClassId(
+  classId: number,
+  trx?: Knex.Transaction,
+) {
+  const connection = trx ?? db
+  const rows = await connection('stores')
+    .join('participants', 'stores.participant_id', 'participants.id')
+    .join('product_categories', 'stores.category_id', 'product_categories.id')
+    .where('participants.class_id', classId)
+    .select(
+      'stores.id as storeId',
+      'stores.ended_at as endedAt',
+      'participants.display_name as studentName',
+      'product_categories.name as storeName',
+    )
+  return rows
+}
+
 export async function updateStoreTotals(
   id: number,
   totals: {

@@ -1,5 +1,5 @@
 import request from 'superagent'
-import type { Store } from '@/models/stores'
+import type { Store, TeacherClassStore } from '@/models/stores'
 import type { StoreSummary } from '@/models/store-summary'
 import type { CreateStoreRequest } from '@/models/stores'
 
@@ -17,6 +17,13 @@ export async function endStore(storeId: number): Promise<Store> {
 
 export async function getStoreSummary(storeId: number): Promise<StoreSummary> {
   const response = await request.get(`${rootURL}/stores/${storeId}/summary`)
+  return response.body
+}
+
+export async function getTeacherClassStores(
+  classCode: string,
+): Promise<TeacherClassStore[]> {
+  const response = await request.get(`${rootURL}/stores/class/${classCode}`)
   return response.body
 }
 

@@ -100,6 +100,24 @@ router.patch('/:id/stock', async (req, res) => {
   }
 })
 
+router.get('/class/:classCode', async (req, res) => {
+  try {
+    const stores = await storesService.getStoresForTeacherDashboard(
+      req.params.classCode,
+    )
+    res.json(stores)
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Failed to get teacher dashboard stores'
+    if (message === 'Class not found') {
+      return res.status(404).json({ error: message })
+    }
+    res.status(500).json({ error: message })
+  }
+})
+
 router.get('/:id/summary', async (req, res) => {
   try {
     const storeId = Number(req.params.id)
