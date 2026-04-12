@@ -63,6 +63,7 @@ router.patch('/:id/stock/retail', async (req, res) => {
         productId: x.productId,
         retailCents: Math.max(0, x.retailCents),
       }))
+    await storesService.requireOpenStore(storeId)
     await dbStoreStock.updateStoreStockRetail(storeId, validItems)
     res.status(200).json({ ok: true })
   } catch (error) {
@@ -70,6 +71,12 @@ router.patch('/:id/stock/retail', async (req, res) => {
       error instanceof Error
         ? error.message
         : 'Failed to update store stock retail'
+    if (message === 'Store not found') {
+      return res.status(404).json({ error: message })
+    }
+    if (message === 'Store has ended') {
+      return res.status(400).json({ error: message })
+    }
     res.status(500).json({ error: message })
   }
 })
@@ -83,6 +90,7 @@ router.patch('/:id/stock', async (req, res) => {
         error: 'quantities object is required',
       })
     }
+    await storesService.requireOpenStore(storeId)
     await dbStoreStock.updateStoreStockQuantities(
       storeId,
       Object.fromEntries(
@@ -96,6 +104,12 @@ router.patch('/:id/stock', async (req, res) => {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Failed to update store stock'
+    if (message === 'Store not found') {
+      return res.status(404).json({ error: message })
+    }
+    if (message === 'Store has ended') {
+      return res.status(400).json({ error: message })
+    }
     res.status(500).json({ error: message })
   }
 })
