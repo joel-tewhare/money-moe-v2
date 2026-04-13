@@ -7,7 +7,6 @@ type Props = {
   className?: string
 }
 
-/** Moe narrative strip — matches the student Summary screen; optional character art. */
 export function StoreSummaryMoeReview({ showMoeImage, className }: Props) {
   return (
     <MoePanel

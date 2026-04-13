@@ -26,7 +26,6 @@ type Props = {
   storeSummary: StoreSummary
 }
 
-/** Shared bestseller / top earner / metric rows — matches the student Summary screen. */
 export function StoreSummaryFigures({ storeSummary }: Props) {
   const totalRevenueCents =
     storeSummary.totalRevenueCents ??
