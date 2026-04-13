@@ -60,6 +60,10 @@
 - Distinguish between:
   - safety that improves UX
   - safety that adds noise
+- Treat backend lifecycle/state rules as domain invariants; enforce them across every mutation path, not just in UI flow
+- Prefer a shared service-layer guard when the same business rule must hold in both transactional and non-transactional paths
+- Separate correctness findings from architectural suggestions; valid structure concerns do not always justify immediate refactors
+- Reject review suggestions that optimise around a flow already expected to change soon
 - Prefer manual recovery over editor-history recovery when changes are small and known
 - Use review to reshape AI output into “your” code, not just validate correctness
 
