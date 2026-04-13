@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { getTeacherClassStores, getStoreSummary } from '@/client/apis/stores'
@@ -23,6 +23,16 @@ export default function TeacherDashboard() {
   const classCode = searchParams.get('classCode')?.trim() ?? ''
 
   const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null)
+  const endedListRef = useRef<HTMLDivElement>(null)
+  const endedListScrollTopRef = useRef(0)
+
+  const clearDetailSelection = () => {
+    setSelectedStoreId(null)
+    requestAnimationFrame(() => {
+      const el = endedListRef.current
+      if (el) el.scrollTop = endedListScrollTopRef.current
+    })
+  }
 
   const {
     data: classStores,
@@ -63,7 +73,7 @@ export default function TeacherDashboard() {
   )
 
   return (
-    <div className="relative min-h-[calc(100vh-6rem)] px-4 pb-56 pt-6 md:pb-48">
+    <div className="relative min-h-[calc(100vh-6rem)] px-4 pb-52 pt-6 sm:pb-48 md:pb-44">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-1 text-xl font-bold text-moe-cream md:text-2xl">
           Class overview
@@ -79,15 +89,21 @@ export default function TeacherDashboard() {
           </p>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-[22rem,1fr]">
-          <section aria-labelledby="ended-heading" className="min-w-0">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,22rem),minmax(0,1fr)] lg:items-start lg:gap-10">
+          <section aria-labelledby="ended-heading" className="min-w-0 lg:sticky lg:top-4 lg:self-start">
             <h2
               id="ended-heading"
               className="mb-3 text-sm font-bold uppercase tracking-wide text-moe-cream"
             >
               Ended
             </h2>
-            <div className="overflow-hidden rounded-xl border border-moe-cream/25 bg-moe-cream/5">
+            <div
+              ref={endedListRef}
+              onScroll={(event) => {
+                endedListScrollTopRef.current = event.currentTarget.scrollTop
+              }}
+              className="max-h-[min(40vh,22rem)] overflow-y-auto overscroll-y-contain rounded-xl border border-moe-cream/25 bg-moe-cream/5 lg:max-h-[calc(100vh-11rem)]"
+            >
               {!classCode ? (
                 <div className="px-4 py-6 text-sm text-moe-cream/80">
                   No class code selected.
@@ -113,6 +129,7 @@ export default function TeacherDashboard() {
                       store.studentName,
                       'Unknown student',
                     )}
+                    isSelected={selectedStoreId === store.storeId}
                     onOpenDetail={() => setSelectedStoreId(store.storeId)}
                   />
                 ))
@@ -120,7 +137,10 @@ export default function TeacherDashboard() {
             </div>
           </section>
 
-          <section aria-labelledby="detail-heading" className="min-w-0">
+          <section
+            aria-labelledby="detail-heading"
+            className="flex min-w-0 min-h-0 flex-col lg:min-h-[calc(100vh-11rem)]"
+          >
             <h2
               id="detail-heading"
               className="mb-3 text-sm font-bold uppercase tracking-wide text-moe-cream"
@@ -152,31 +172,33 @@ export default function TeacherDashboard() {
                 Store summary could not be loaded.
               </div>
             ) : (
-              <TeacherStoreSummaryStub
-                onBack={() => setSelectedStoreId(null)}
-                storeIdLabel={formatStoreId(selectedEndedStore.storeId)}
-                studentName={getCleanedName(
-                  selectedEndedStore.studentName,
-                  'Unknown student',
-                )}
-                storeSummary={selectedStoreSummary}
-              />
+              <div className="flex min-h-[14rem] flex-1 flex-col lg:min-h-0">
+                <TeacherStoreSummaryStub
+                  onBack={clearDetailSelection}
+                  storeIdLabel={formatStoreId(selectedEndedStore.storeId)}
+                  studentName={getCleanedName(
+                    selectedEndedStore.studentName,
+                    'Unknown student',
+                  )}
+                  storeSummary={selectedStoreSummary}
+                />
+              </div>
             )}
           </section>
         </div>
       </div>
 
       <aside
-        className="fixed bottom-4 left-4 z-30 w-[min(100%-2rem,20rem)] rounded-xl border-2 border-moe-slate bg-moe-cream p-4 shadow-lg"
+        className="fixed bottom-3 left-3 z-30 w-[min(100%-1.5rem,17.5rem)] rounded-lg border border-moe-slate/70 bg-moe-cream/95 p-3 shadow-md backdrop-blur-sm"
         aria-labelledby="in-progress-heading"
       >
         <h2
           id="in-progress-heading"
-          className="mb-2 text-xs font-bold uppercase tracking-wide text-moe-slate"
+          className="mb-1.5 text-[0.65rem] font-bold uppercase tracking-wide text-moe-slate/90"
         >
           In progress
         </h2>
-        <div className="max-h-48 overflow-y-auto pr-1">
+        <div className="max-h-40 overflow-y-auto overscroll-y-contain pr-0.5 text-sm">
           {!classCode ? (
             <p className="py-2 text-sm text-moe-slate/80">
               No class code selected.
