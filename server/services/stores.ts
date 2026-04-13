@@ -1,8 +1,11 @@
+import type { Knex } from 'knex'
 import * as dbStores from '../db/stores.js'
 import * as dbStoreStock from '../db/store-stock.js'
 import * as dbSales from '../db/sales.js'
 import * as dbSaleItems from '../db/sale-items.js'
+import * as dbParticipants from '../db/participants.js'
 import db from '../db/connection.js'
+import type { Store } from '@/models/stores.js'
 import type {
   StoreSummaryBestseller,
   StoreSummaryTopEarner,
@@ -124,6 +127,20 @@ function calculateProductTotals(
   }
 }
 
+export async function requireOpenStore(
+  storeId: number,
+  trx?: Knex.Transaction,
+): Promise<Store> {
+  const store = await dbStores.getStoreById(storeId, trx)
+  if (!store) {
+    throw new Error('Store not found')
+  }
+  if (store.endedAt != null) {
+    throw new Error('Store has ended')
+  }
+  return store
+}
+
 export async function createStoreWithStock(
   categoryId: number,
   participantId: number,
@@ -203,4 +220,15 @@ export async function getStoreSummary(storeId: number) {
     bestseller,
     topEarner,
   }
+}
+
+export async function getStoresForTeacherDashboard(classCode: string) {
+  const cleanCode = classCode.trim()
+  const classId = await dbParticipants.getClassIdByCode(cleanCode)
+
+  if (classId == null) {
+    throw new Error('Class not found')
+  }
+
+  return dbStores.getStoresByClassId(classId)
 }

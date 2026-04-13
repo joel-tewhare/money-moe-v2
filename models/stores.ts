@@ -15,3 +15,10 @@ export interface CreateStoreRequest {
   categoryId: number
   participantId: number
 }
+
+export interface TeacherClassStore {
+  storeId: number
+  endedAt: string | null
+  studentName: string | null
+  storeName: string | null
+}

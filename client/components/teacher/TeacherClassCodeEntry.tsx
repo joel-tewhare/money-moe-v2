@@ -10,8 +10,11 @@ export default function TeacherClassCodeEntry() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!classCode.trim()) return
-    navigate('/teacher/dashboard')
+    const cleanedClassCode = classCode.trim()
+    if (!cleanedClassCode) return
+    navigate(
+      `/teacher/dashboard?classCode=${encodeURIComponent(cleanedClassCode)}`,
+    )
   }
 
   return (
@@ -21,7 +24,10 @@ export default function TeacherClassCodeEntry() {
       </h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="class-code" className="text-lg font-semibold text-moe-cream">
+          <Label
+            htmlFor="class-code"
+            className="text-lg font-semibold text-moe-cream"
+          >
             Class code
           </Label>
           <Input

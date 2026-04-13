@@ -1,10 +1,10 @@
 import * as dbProducts from '../db/products.js'
 import * as dbSaleItems from '../db/sale-items.js'
 import * as dbSales from '../db/sales.js'
-import * as dbStores from '../db/stores.js'
 import * as dbStoreStock from '../db/store-stock.js'
 import db from '../db/connection.js'
 import { SaleItem } from '@/models/sale-items.js'
+import * as storesService from './stores.js'
 
 export async function processCheckout(
   storeId: number,
@@ -15,10 +15,7 @@ export async function processCheckout(
   }
 
   return db.transaction(async (trx) => {
-    const store = await dbStores.getStoreById(storeId, trx)
-    if (!store) {
-      throw new Error('Store not found')
-    }
+    await storesService.requireOpenStore(storeId, trx)
 
     const sale = await dbSales.createSale(storeId, trx)
     const saleItems: SaleItem[] = []
