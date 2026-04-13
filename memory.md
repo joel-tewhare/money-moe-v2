@@ -6,6 +6,7 @@
 - Only include `null` or `undefined` if they are realistic based on the data source
 - Avoid adding `undefined` to types unless it can actually occur in the data flow
 - Simplify defensive checks when backend guarantees are trusted (e.g. avoid `typeof` + `Number.isFinite` when not needed)
+- When contracts are uncertain, validate once at the boundary (API decode/mapper) rather than scattering defensive checks throughout UI/business logic
 
 ### UI vs Data Responsibility
 
@@ -69,7 +70,7 @@
 
 ### Workflow Improvements
 
-- Always checkpoint (git commit) before prompting refactors
+- Always checkpoint (git commit) before high-churn edits (refactors, wide renames, or multi-file changes)
 - Treat refactors during review as optional, not mandatory
 - Continue momentum rather than over-investing in low-value recovery
 - Memory file is for capturing patterns and decisions to improve future sessions
